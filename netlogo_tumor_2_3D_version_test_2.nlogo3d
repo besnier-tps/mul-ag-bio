@@ -4,21 +4,22 @@ turtles-own
   age  ;; age of cell. changes color with age
   metastatic?  ;; false for progeny of stem cell 0, true for progeny of stem cell 1
   EGFR
-  RAS             ; 0 si désactivée, 1 si activée
-  RAF             ; 0 si désactivée, 1 si activée
-  
+  RAS             ; 0 si désactivée, 1 si activée normal, 2 si activé mode tumeur
+  RAF             ; 0 si désactivée, 1 si activée normal, 2 si activé mode tumeur
+
 ]
 
 patches-own
 [
   GEF         ;;growth factor
   GAP         ;;growth factor
-  other_growth_factors      ;;growth factor
+  ogf         ;;other growth factor activating EGFR
 ]
 
 globals
 [
   cell-count
+  RAS-count
 ]
 
 to setup
@@ -41,7 +42,7 @@ to set-stem   ;;create two stem cells
     set metastatic? false
     set color blue
     set age 0
-    set RAS false
+    set RAS 0
   ]
   ask turtle 1
   [
@@ -58,22 +59,48 @@ end
     ;;]
 ;;end
 
-to go
+to go         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;GO;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ask turtles
   [
     if (who = 1) and (xcor < max-pxcor - 12)
     [ fd 0.1 ]  ;stem cell movement
     set age age + 1
     move-transitional-cells
-    if (patch.GEF) and (count turtles-here >= 0)
-      [ activate_RAS ]
-    if (patch.GAP) and (count turtles-here >= 0)
-      [ deactivate_RAS ]
     mitosis
     death
-  ]
 
-  ;;consommation
+    if (patch.EGFR = 0)
+    [ set RAS 0 ]
+      
+     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;activation anormale de RAS 
+    
+        if (patch.GAP = 1) and (patch.GEF = 0) ;and (count turtles-here >= 0)
+         [ set RAS 1 ]
+       if (patch.GAP = 2) and (patch.GEF = 1) ;and (count turtles-here >= 0)
+         [ set RAS 2 ]
+       if (patch.GAP = 2) and (patch.GEF = 0) ;and (count turtles-here >= 0)
+         [ set RAS 2 ]
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;desactivation anormale de RAS
+
+       if (patch.GEF = 1) and (patch.GAP = 0) ;and (count turtles-here >= 0)
+         [ set RAS 0 ]
+       if (patch.GEF = 2) and (patch.GAP = 1) ;and (count turtles-here >= 0)
+         [ set RAS 1 ]
+       if (patch.GEF = 2) and (patch.GAP = 0) ;and (count turtles-here >= 0)
+         [ set RAS 0 ]
+     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;activation/desactivation normale de RAS
+
+
+    if (patch.GEF = 0) and (patch.GAP = 0) ;and (count turtles-here >= 0)
+      [ set RAS 0 ]
+    if (patch.GEF = 1) and (patch.GAP = 1) ;and (count turtles-here >= 0)
+      [ set RAS 1 ]
+    if (patch.GEF = 2) and (patch.GAP = 2) ;and (count turtles-here >= 0)                    ;;;;; pb ici : faut-il considerer ce cas qui ne se produit en theorie pas ?
+      [ set RAS 1 ]                                                                          ;;;;; et dans ce cas que faire vis a vis de RAS ?
+   
+  
+   set RAS-count ([RAS] of (turtle 1))
+  ]
 
   tick
   evaluate-params
@@ -99,7 +126,7 @@ to move-transitional-cells
 end
 
 to mitosis ;; turtle proc. - stem cells only
-  if (stem?) and (RAS)
+  if ((stem?) and (RAS = 1)) or ((stem?) and (RAS = 2))
   [
     hatch 1
     [
@@ -112,7 +139,7 @@ to mitosis ;; turtle proc. - stem cells only
     ]
   ]
 
-  if (not stem?) and (distancexyz (min-pxcor / 3) (min-pycor / 3) (min-pzcor / 3) < 0.8) and (RAS)                                 ;; division des cellules autres que souches proches des cellules souches
+  if (not stem?) and (distancexyz (min-pxcor / 3) (min-pycor / 3) (min-pzcor / 3) < 0.8) and (RAS = 2)                                 ;; division des cellules autres que souches proches des cellules souches
   [
     hatch 1
     [
@@ -154,24 +181,7 @@ to kill-transitory-cells
     [ die ]
 end
 
-;;to consommation
- ;; ask patches with [(O2 > 0) and (H+ < 20)]
- ;;   [
-    ;;  set O2 O2 - (count turtles-here) / 2
-    ;;  set H+ H+ + (count turtles-here) / 2
-  ;;  ]
-;;end
 
-
-to activate_RAS
-  ask turtles with [ RAS = false ]
-  [ set RAS true ]
-end
-
-to deactivate_RAS
-   ask turtles with [ RAS = true ]
-  [ set RAS false ]
-end
 
 
 
@@ -179,5 +189,6 @@ end
 ;;;;;;;;;;partie commentaire;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; mettre des cirseurs pour chaque protéine ou composant ayant une influence majeur dans le comportement de le tumeur
 ;ajouter un bouton chimio qui tue quasi toutes les cellules sauf les souches et mettre une proba très faible pour que les souches relancent une tumeur(rand entre 0 et 1 et que si le nombre est <0.000000000001 par exemple)
+
 
 
