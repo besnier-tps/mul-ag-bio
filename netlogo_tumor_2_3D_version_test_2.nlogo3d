@@ -69,37 +69,80 @@ to go         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;GO;;
     mitosis
     death
 
-    if (patch.EGFR = 0)
+;;;;;;;;;;;;;;activation EGFR;;;;;;;;;;;; peut etre pas necessaire ca depend directement de ogf donc a voir si on garde ogf pour avoir du sens vis a vis des facteurs de croissance ou non
+
+   if (patch.ogf = 0)
+     [set EGFR 0]
+   if (patch.ogf = 1)
+     [set EGFR 1]
+   if (patch.ogf = 2)
+     [set EGFR 2]
+
+
+
+;;;;;;cas pas de EGFER  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 
+ if ([EGFR] of turtle 0 = 0)
     [ set RAS 0 ]
-      
-     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;activation anormale de RAS 
-    
-        if (patch.GAP = 1) and (patch.GEF = 0) ;and (count turtles-here >= 0)
+
+;;;;;cas EGFER normal;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;activation anormale de RAS
+ if ([EGFR] of turtle 0 = 1)
+ [
+       if (patch.GEF = 1) and (patch.GAP = 0)
          [ set RAS 1 ]
-       if (patch.GAP = 2) and (patch.GEF = 1) ;and (count turtles-here >= 0)
+       if (patch.GEF = 2) and (patch.GAP = 1)
          [ set RAS 2 ]
-       if (patch.GAP = 2) and (patch.GEF = 0) ;and (count turtles-here >= 0)
+       if (patch.GEF = 2) and (patch.GAP = 0) 
          [ set RAS 2 ]
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;desactivation anormale de RAS
-
-       if (patch.GEF = 1) and (patch.GAP = 0) ;and (count turtles-here >= 0)
+   
+       if (patch.GEF = 0) and (patch.GAP = 1) 
          [ set RAS 0 ]
-       if (patch.GEF = 2) and (patch.GAP = 1) ;and (count turtles-here >= 0)
+       if (patch.GEF = 1) and (patch.GAP = 2) 
          [ set RAS 1 ]
-       if (patch.GEF = 2) and (patch.GAP = 0) ;and (count turtles-here >= 0)
+       if (patch.GEF = 0) and (patch.GAP = 2) 
          [ set RAS 0 ]
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;activation/desactivation normale de RAS
-
-
-    if (patch.GEF = 0) and (patch.GAP = 0) ;and (count turtles-here >= 0)
-      [ set RAS 0 ]
-    if (patch.GEF = 1) and (patch.GAP = 1) ;and (count turtles-here >= 0)
-      [ set RAS 1 ]
-    if (patch.GEF = 2) and (patch.GAP = 2) ;and (count turtles-here >= 0)                    ;;;;; pb ici : faut-il considerer ce cas qui ne se produit en theorie pas ?
-      [ set RAS 1 ]                                                                          ;;;;; et dans ce cas que faire vis a vis de RAS ?
    
-  
-   set RAS-count ([RAS] of (turtle 1))
+   
+      if (patch.GEF = 0) and (patch.GAP = 0) 
+        [ set RAS 0 ]
+      if (patch.GEF = 1) and (patch.GAP = 1) 
+        [ set RAS 1 ]
+      if (patch.GEF = 2) and (patch.GAP = 2)                     ;;;;; pb ici : faut-il considerer ce cas qui ne se produit en theorie pas ?
+        [ set RAS 1 ]                                                                          ;;;;; et dans ce cas que faire vis a vis de RAS ?
+ ]
+;;;;;cas EGFER suractivé;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;activation anormale de RAS
+if ([EGFR] of turtle 0 = 2)
+[
+    if (patch.GEF = 1) and (patch.GAP = 0) 
+      [ set RAS 2 ]
+    if (patch.GEF = 2) and (patch.GAP = 1) 
+      [ set RAS 2 ]
+    if (patch.GEF = 2) and (patch.GAP = 0) 
+      [ set RAS 2 ]
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;desactivation anormale de RAS
+
+    if (patch.GEF = 0) and (patch.GAP = 1) 
+      [ set RAS 0 ]
+    if (patch.GEF = 1) and (patch.GAP = 2)                          ; voir ici si le fait que EGFER soit a fond compense le fait qu'il y ait plus de GEF que de GAP ???
+      [ set RAS 1 ]
+    if (patch.GEF = 0) and (patch.GAP = 0) 
+      [ set RAS 0 ]
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;activation/desactivation normale de RAS
+
+   if (patch.GEF = 0) and (patch.GAP = 0) 
+     [ set RAS 0 ]
+   if (patch.GEF = 1) and (patch.GAP = 1) 
+     [ set RAS 1 ]
+   if (patch.GEF = 2) and (patch.GAP = 2)                     ;;;;; pb ici : faut-il considerer ce cas qui ne se produit en theorie pas ?
+     [ set RAS 1 ] 
+]   
+   
+   
+   set RAS-count ([RAS] of (turtle 0))
   ]
 
   tick
@@ -189,6 +232,5 @@ end
 ;;;;;;;;;;partie commentaire;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; mettre des cirseurs pour chaque protéine ou composant ayant une influence majeur dans le comportement de le tumeur
 ;ajouter un bouton chimio qui tue quasi toutes les cellules sauf les souches et mettre une proba très faible pour que les souches relancent une tumeur(rand entre 0 et 1 et que si le nombre est <0.000000000001 par exemple)
-
 
 
